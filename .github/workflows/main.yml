@@ -1,0 +1,32 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get latest code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: <your_code_directory>
+
+      - name: Build
+        run: npm run build
+        working-directory: <your_code_directory>
+
+      - name: Deploy to AWS EC2
+        uses: burnett01/rsync-deployments@5.1
+        with:
+          switches: -avzr --delete
+          path: ./*
+          remote_path: /var/www/html/<your_project_directory>/
+          remote_host: <your_ec2_ip_address>
+          remote_user: ec2-user
+          remote_key: "${{ secrets.SSH_PRIVATE_KEY }}"
